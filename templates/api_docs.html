@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">API Documentation</h4>
+            </div>
+            <div class="card-body">
+                <h5>Base URL</h5>
+                <pre class="bg-light p-3">http://localhost:1231</pre>
+
+                <hr>
+
+                <h5 class="mt-4">Endpoints</h5>
+
+                <!-- Health Check Endpoint -->
+                <div class="endpoint-section mb-4">
+                    <h6 class="text-primary">1. Health Check</h6>
+                    <code>GET /health</code>
+                    <p>Check if the API and model are running properly.</p>
+                    
+                    <div class="mt-3">
+                        <strong>Response Example:</strong>
+                        <pre class="bg-light p-3">{
+    "status": "healthy",
+    "model_loaded": true,
+    "scaler_loaded": true,
+    "label_encoders_loaded": true,
+    "target_encoder_loaded": true
+}</pre>
+                    </div>
+                </div>
+
+                <!-- Single Prediction Endpoint -->
+                <div class="endpoint-section mb-4">
+                    <h6 class="text-primary">2. Single Prediction</h6>
+                    <code>POST /predict</code>
+                    <p>Get thyroid cancer risk prediction for a single patient.</p>
+
+                    <div class="mt-3">
+                        <strong>Request Body:</strong>
+                        <pre class="bg-light p-3">{
+    "Age": 45,
+    "Gender": "Female",
+    "Country": "USA",
+    "Ethnicity": "Caucasian",
+    "TSH_Level": 2.5,
+    "T3_Level": 1.8,
+    "T4_Level": 10.5,
+    "Nodule_Size": 2.3,
+    "Family_History": "No",
+    "Radiation_Exposure": "No",
+    "Iodine_Deficiency": "No",
+    "Smoking": "No",
+    "Obesity": "No",
+    "Diabetes": "No"
+}</pre>
+                    </div>
+
+                    <div class="mt-3">
+                        <strong>Response Example:</strong>
+                        <pre class="bg-light p-3">{
+    "prediction": "Benign",
+    "probability": {
+        "Benign": 0.85,
+        "Malignant": 0.15
+    }
+}</pre>
+                    </div>
+
+                    <div class="mt-3">
+                        <strong>Field Constraints:</strong>
+                        <ul>
+                            <li><code>Age</code>: numeric, 0-120</li>
+                            <li><code>Gender</code>: "Male" or "Female"</li>
+                            <li><code>Country</code>: One of ["USA", "UK", "China", "India", "Japan", "Germany", "Brazil", "Russia", "South Korea", "Nigeria"]</li>
+                            <li><code>Ethnicity</code>: One of ["African", "Asian", "Caucasian", "Hispanic", "Middle Eastern"]</li>
+                            <li><code>TSH_Level</code>: numeric, positive</li>
+                            <li><code>T3_Level</code>: numeric, positive</li>
+                            <li><code>T4_Level</code>: numeric, positive</li>
+                            <li><code>Nodule_Size</code>: numeric, positive</li>
+                            <li>All other fields: "Yes" or "No"</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Batch Prediction Endpoint -->
+                <div class="endpoint-section mb-4">
+                    <h6 class="text-primary">3. Batch Prediction</h6>
+                    <code>POST /batch_predict</code>
+                    <p>Get thyroid cancer risk predictions for multiple patients using a CSV file.</p>
+
+                    <div class="mt-3">
+                        <strong>Request:</strong>
+                        <p>Send a multipart/form-data request with a CSV file containing patient records.</p>
+                        <p>Download the <a href="/static/sample_template.csv">sample CSV template</a> for the correct format.</p>
+                    </div>
+
+                    <div class="mt-3">
+                        <strong>Response Example:</strong>
+                        <pre class="bg-light p-3">[
+    {
+        "prediction": "Benign",
+        "probability": {
+            "Benign": 0.85,
+            "Malignant": 0.15
+        }
+    },
+    {
+        "prediction": "Malignant",
+        "probability": {
+            "Benign": 0.25,
+            "Malignant": 0.75
+        }
+    }
+]</pre>
+                    </div>
+                </div>
+
+                <!-- Error Responses -->
+                <div class="endpoint-section">
+                    <h6 class="text-primary">Error Responses</h6>
+                    <p>All endpoints may return the following error responses:</p>
+
+                    <div class="mt-3">
+                        <strong>400 Bad Request:</strong>
+                        <pre class="bg-light p-3">{
+    "error": "Description of the validation error"
+}</pre>
+                    </div>
+
+                    <div class="mt-3">
+                        <strong>503 Service Unavailable:</strong>
+                        <pre class="bg-light p-3">{
+    "error": "Model not loaded. Please train the model first."
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Thyroid Cancer Risk Assessment</h4>
+            </div>
+            <div class="card-body">
+                <form id="predictionForm" onsubmit="submitForm(event)">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="age" class="form-label">Age</label>
+                            <input type="number" class="form-control" id="age" name="Age" required min="0" max="120">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="gender" class="form-label">Gender</label>
+                            <select class="form-select" id="gender" name="Gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="country" class="form-label">Country</label>
+                            <select class="form-select" id="country" name="Country" required>
+                                <option value="">Select Country</option>
+                                <option value="USA">USA</option>
+                                <option value="UK">UK</option>
+                                <option value="China">China</option>
+                                <option value="India">India</option>
+                                <option value="Japan">Japan</option>
+                                <option value="Germany">Germany</option>
+                                <option value="Brazil">Brazil</option>
+                                <option value="Russia">Russia</option>
+                                <option value="South Korea">South Korea</option>
+                                <option value="Nigeria">Nigeria</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="ethnicity" class="form-label">Ethnicity</label>
+                            <select class="form-select" id="ethnicity" name="Ethnicity" required>
+                                <option value="">Select Ethnicity</option>
+                                <option value="African">African</option>
+                                <option value="Asian">Asian</option>
+                                <option value="Caucasian">Caucasian</option>
+                                <option value="Hispanic">Hispanic</option>
+                                <option value="Middle Eastern">Middle Eastern</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="tsh" class="form-label">TSH Level</label>
+                            <input type="number" class="form-control" id="tsh" name="TSH_Level" required step="0.1" min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="t3" class="form-label">T3 Level</label>
+                            <input type="number" class="form-control" id="t3" name="T3_Level" required step="0.1" min="0">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="t4" class="form-label">T4 Level</label>
+                            <input type="number" class="form-control" id="t4" name="T4_Level" required step="0.1" min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="nodule" class="form-label">Nodule Size (cm)</label>
+                            <input type="number" class="form-control" id="nodule" name="Nodule_Size" required step="0.1" min="0">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Risk Factors</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="family_history" name="Family_History" value="Yes">
+                                <label class="form-check-label" for="family_history">Family History</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="radiation" name="Radiation_Exposure" value="Yes">
+                                <label class="form-check-label" for="radiation">Radiation Exposure</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="iodine" name="Iodine_Deficiency" value="Yes">
+                                <label class="form-check-label" for="iodine">Iodine Deficiency</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Additional Factors</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="smoking" name="Smoking" value="Yes">
+                                <label class="form-check-label" for="smoking">Smoking</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="obesity" name="Obesity" value="Yes">
+                                <label class="form-check-label" for="obesity">Obesity</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="diabetes" name="Diabetes" value="Yes">
+                                <label class="form-check-label" for="diabetes">Diabetes</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Get Prediction</button>
+                </form>
+
+                <div id="result" class="mt-4" style="display: none;">
+                    <h5>Prediction Result:</h5>
+                    <div class="alert" id="prediction-alert" role="alert"></div>
+                    <div class="progress mb-3">
+                        <div class="progress-bar" id="probability-bar" role="progressbar"></div>
+                    </div>
+                    <p id="probability-text"></p>
+                </div>
+
+                <div id="error-message" class="alert alert-danger mt-3" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function submitForm(event) {
+    event.preventDefault();
+    const form = document.getElementById('predictionForm');
+    const formData = new FormData(form);
+    
+    // Create the data object with default values for checkboxes
+    const data = {
+        Age: parseInt(formData.get('Age')),
+        Gender: formData.get('Gender'),
+        Country: formData.get('Country'),
+        Ethnicity: formData.get('Ethnicity'),
+        TSH_Level: parseFloat(formData.get('TSH_Level')),
+        T3_Level: parseFloat(formData.get('T3_Level')),
+        T4_Level: parseFloat(formData.get('T4_Level')),
+        Nodule_Size: parseFloat(formData.get('Nodule_Size')),
+        Family_History: 'No',
+        Radiation_Exposure: 'No',
+        Iodine_Deficiency: 'No',
+        Smoking: 'No',
+        Obesity: 'No',
+        Diabetes: 'No'
+    };
+
+    // Update checkbox values if checked
+    if (formData.get('Family_History')) data.Family_History = 'Yes';
+    if (formData.get('Radiation_Exposure')) data.Radiation_Exposure = 'Yes';
+    if (formData.get('Iodine_Deficiency')) data.Iodine_Deficiency = 'Yes';
+    if (formData.get('Smoking')) data.Smoking = 'Yes';
+    if (formData.get('Obesity')) data.Obesity = 'Yes';
+    if (formData.get('Diabetes')) data.Diabetes = 'Yes';
+
+    // Hide any previous error messages
+    document.getElementById('error-message').style.display = 'none';
+    document.getElementById('result').style.display = 'none';
+
+    console.log('Sending data:', data);  // Debug log
+
+    fetch('/predict', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        console.log('Response status:', response.status);  // Debug log
+        return response.json().then(data => {
+            if (!response.ok) {
+                throw new Error(data.error || 'Server error');
+            }
+            return data;
+        });
+    })
+    .then(result => {
+        console.log('Received result:', result);  // Debug log
+        
+        if (result.error) {
+            throw new Error(result.error);
+        }
+
+        const resultDiv = document.getElementById('result');
+        const alert = document.getElementById('prediction-alert');
+        const bar = document.getElementById('probability-bar');
+        const probText = document.getElementById('probability-text');
+        
+        resultDiv.style.display = 'block';
+        
+        // Make sure we have the probability values
+        if (!result.probability || typeof result.probability.Malignant === 'undefined') {
+            throw new Error('Invalid response format from server');
+        }
+
+        const malignantProb = result.probability.Malignant * 100;
+        bar.style.width = `${malignantProb}%`;
+        
+        if (result.prediction === 'Malignant') {
+            alert.className = 'alert alert-danger';
+            alert.textContent = 'High Risk: Potential Malignant Thyroid Cancer';
+            bar.className = 'progress-bar bg-danger';
+        } else {
+            alert.className = 'alert alert-success';
+            alert.textContent = 'Low Risk: Likely Benign';
+            bar.className = 'progress-bar bg-success';
+        }
+        
+        probText.textContent = `Malignant Probability: ${malignantProb.toFixed(1)}%`;
+    })
+    .catch(error => {
+        console.error('Error:', error);  // Debug log
+        const errorDiv = document.getElementById('error-message');
+        errorDiv.textContent = error.message || 'An error occurred while processing your request.';
+        errorDiv.style.display = 'block';
+    });
+}
+</script>
+{% endblock %}

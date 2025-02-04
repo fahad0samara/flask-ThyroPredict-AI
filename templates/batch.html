@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Batch Thyroid Cancer Risk Assessment</h4>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h5>CSV File Format Requirements:</h5>
+                    <p>Your CSV file should contain the following columns:</p>
+                    <ul>
+                        <li>Age (numeric, 0-120)</li>
+                        <li>Gender (Male/Female)</li>
+                        <li>Country (USA/UK/China/India/Japan/Germany/Brazil/Russia/South Korea/Nigeria)</li>
+                        <li>Ethnicity (African/Asian/Caucasian/Hispanic/Middle Eastern)</li>
+                        <li>TSH_Level (numeric)</li>
+                        <li>T3_Level (numeric)</li>
+                        <li>T4_Level (numeric)</li>
+                        <li>Nodule_Size (numeric)</li>
+                        <li>Family_History (Yes/No)</li>
+                        <li>Radiation_Exposure (Yes/No)</li>
+                        <li>Iodine_Deficiency (Yes/No)</li>
+                        <li>Smoking (Yes/No)</li>
+                        <li>Obesity (Yes/No)</li>
+                        <li>Diabetes (Yes/No)</li>
+                    </ul>
+                </div>
+
+                <form id="batchForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="csvFile" class="form-label">Upload CSV File</label>
+                        <input type="file" class="form-control" id="csvFile" name="file" accept=".csv" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload and Process</button>
+                </form>
+
+                <div id="result" class="mt-4" style="display: none;">
+                    <h5>Batch Processing Results:</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Row</th>
+                                    <th>Prediction</th>
+                                    <th>Malignant Probability</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultTable">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="error-message" class="alert alert-danger mt-3" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Sample CSV Template -->
+        <div class="card mt-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Download Sample Template</h5>
+            </div>
+            <div class="card-body">
+                <p>Download our sample CSV template to ensure your data is formatted correctly:</p>
+                <a href="/static/sample_template.csv" class="btn btn-info" download>Download Template</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('batchForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    
+    const formData = new FormData();
+    const fileInput = document.getElementById('csvFile');
+    
+    if (fileInput.files.length === 0) {
+        showError('Please select a CSV file');
+        return;
+    }
+    
+    formData.append('file', fileInput.files[0]);
+    
+    // Hide previous results and errors
+    document.getElementById('error-message').style.display = 'none';
+    document.getElementById('result').style.display = 'none';
+    
+    fetch('/batch_predict', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json().then(data => {
+        if (!response.ok) throw new Error(data.error || 'Server error');
+        return data;
+    }))
+    .then(results => {
+        const resultTable = document.getElementById('resultTable');
+        resultTable.innerHTML = '';
+        
+        results.forEach((result, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${result.prediction}</td>
+                <td>${(result.probability.Malignant * 100).toFixed(1)}%</td>
+                <td><span class="badge ${result.prediction === 'Malignant' ? 'bg-danger' : 'bg-success'}">${result.prediction}</span></td>
+            `;
+            resultTable.appendChild(row);
+        });
+        
+        document.getElementById('result').style.display = 'block';
+    })
+    .catch(error => {
+        showError(error.message);
+    });
+});
+
+function showError(message) {
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+}
+</script>
+{% endblock %}

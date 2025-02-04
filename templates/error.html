@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">Error</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+                <div class="mt-3">
+                    <h5>Possible Solutions:</h5>
+                    <ol>
+                        <li>Run the model training script first:
+                            <pre class="bg-light p-2 mt-2">python save_model.py</pre>
+                        </li>
+                        <li>Make sure all required files exist in the models/ directory:
+                            <ul class="mt-2">
+                                <li>best_model.joblib</li>
+                                <li>scaler.joblib</li>
+                                <li>label_encoders.joblib</li>
+                                <li>target_encoder.joblib</li>
+                            </ul>
+                        </li>
+                        <li>Check if the models/ directory exists and has write permissions.</li>
+                    </ol>
+                </div>
+                <div class="mt-4">
+                    <a href="/" class="btn btn-primary">Try Again</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
