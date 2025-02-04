@@ -34,11 +34,14 @@ ENV/
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# Large files (temporary)
-*.joblib
+# Data files (keep only essential model files)
 *.csv
 data/
-models/
+models/*
+!models/best_model.joblib
+!models/scaler.joblib
+!models/label_encoders.joblib
+!models/target_encoder.joblib
 
 # Local development settings
 .env
