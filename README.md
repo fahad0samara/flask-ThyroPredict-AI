@@ -10,7 +10,6 @@ An advanced machine learning-powered API for early thyroid cancer risk assessmen
 <div align="center">
 
 [![GitHub followers](https://img.shields.io/github/followers/fahad0samara?style=social)](https://github.com/fahad0samara)
-[![Twitter Follow](https://img.shields.io/twitter/follow/fahad?style=social)](https://twitter.com/fahad)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue)](https://linkedin.com/in/fahad-samara)
 
 **Created by [Fahad Samara](https://github.com/fahad0samara)**
